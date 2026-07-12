@@ -75,7 +75,7 @@ EOT
     target_zone                               = optional(string)
     target_edge_zone                          = optional(string)
     test_network_id                           = optional(string)
-    managed_disk = optional(object({
+    managed_disk = optional(list(object({
       disk_id                    = string
       staging_storage_account_id = string
       target_disk_encryption = optional(object({
@@ -92,8 +92,8 @@ EOT
       target_disk_type              = string
       target_replica_disk_type      = string
       target_resource_group_id      = string
-    }))
-    network_interface = optional(object({
+    })))
+    network_interface = optional(list(object({
       failover_test_public_ip_address_id              = optional(string)
       failover_test_static_ip                         = optional(string)
       failover_test_subnet_name                       = optional(string)
@@ -102,89 +102,20 @@ EOT
       source_network_interface_id                     = optional(string)
       target_static_ip                                = optional(string)
       target_subnet_name                              = optional(string)
-    }))
-    unmanaged_disk = optional(object({
+    })))
+    unmanaged_disk = optional(list(object({
       disk_uri                   = string
       staging_storage_account_id = string
       target_storage_account_id  = string
-    }))
+    })))
   }))
-  validation {
-    condition = alltrue([
-      for k, v in var.site_recovery_replicated_vms : (
-        length(v.name) > 0
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.site_recovery_replicated_vms : (
-        length(v.source_recovery_fabric_name) > 0
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.site_recovery_replicated_vms : (
-        length(v.source_recovery_protection_container_name) > 0
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.site_recovery_replicated_vms : (
-        v.target_zone == null || (length(v.target_zone) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.site_recovery_replicated_vms : (
-        v.target_edge_zone == null || (length(v.target_edge_zone) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.site_recovery_replicated_vms : (
-        v.unmanaged_disk == null || (length(v.unmanaged_disk.disk_uri) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.site_recovery_replicated_vms : (
-        v.multi_vm_group_name == null || (length(v.multi_vm_group_name) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.site_recovery_replicated_vms : (
-        v.managed_disk == null || (length(v.managed_disk.disk_id) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.site_recovery_replicated_vms : (
-        v.target_virtual_machine_size == null || (length(v.target_virtual_machine_size) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
   # --- Unconfirmed validation candidates, derived from azurerm_site_recovery_replicated_vm's provider source ---
   # Not auto-enabled: either a bespoke provider validator we can't safely translate,
   # or a path that crosses a list-typed block (needs its own for_each wrapping).
   # Review, translate into a real validation{} block above, and delete once confirmed.
+  # path: name
+  #   condition: length(value) > 0
+  #   message:   must not be empty
   # path: resource_group_name
   #   condition: length(value) <= 90
   #   message:   [from resourcegroups.ValidateName: invalid when len(value) > 90]
@@ -201,6 +132,9 @@ EOT
   #   source:    [from resourcegroups.ValidateName] !matched
   # path: recovery_vault_name
   #   source:    validate.RecoveryServicesVaultName: no recognizable `if ... { errors = append(...) }` pattern - read it by hand
+  # path: source_recovery_fabric_name
+  #   condition: length(value) > 0
+  #   message:   must not be empty
   # path: source_vm_id
   #   source:    [from azure.ValidateResourceID] !ok
   # path: source_vm_id
@@ -213,6 +147,9 @@ EOT
   #   source:    [from replicationpolicies.ValidateReplicationPolicyID] !ok
   # path: recovery_replication_policy_id
   #   source:    [from replicationpolicies.ValidateReplicationPolicyID] err != nil
+  # path: source_recovery_protection_container_name
+  #   condition: length(value) > 0
+  #   message:   must not be empty
   # path: target_recovery_protection_container_id
   #   source:    [from replicationprotectioncontainers.ValidateReplicationProtectionContainerID] !ok
   # path: target_recovery_protection_container_id
@@ -225,6 +162,9 @@ EOT
   #   source:    [from commonids.ValidateAvailabilitySetID] !ok
   # path: target_availability_set_id
   #   source:    [from commonids.ValidateAvailabilitySetID] err != nil
+  # path: target_zone
+  #   condition: length(value) > 0
+  #   message:   must not be empty
   # path: target_network_id
   #   source:    [from commonids.ValidateVirtualNetworkID] !ok
   # path: target_network_id
@@ -233,6 +173,12 @@ EOT
   #   source:    [from commonids.ValidateVirtualNetworkID] !ok
   # path: test_network_id
   #   source:    [from commonids.ValidateVirtualNetworkID] err != nil
+  # path: target_edge_zone
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: unmanaged_disk.disk_uri
+  #   condition: length(value) > 0
+  #   message:   must not be empty
   # path: unmanaged_disk.staging_storage_account_id
   #   source:    [from azure.ValidateResourceID] !ok
   # path: unmanaged_disk.staging_storage_account_id
@@ -241,6 +187,12 @@ EOT
   #   source:    [from commonids.ValidateStorageAccountID] !ok
   # path: unmanaged_disk.target_storage_account_id
   #   source:    [from commonids.ValidateStorageAccountID] err != nil
+  # path: multi_vm_group_name
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: managed_disk.disk_id
+  #   condition: length(value) > 0
+  #   message:   must not be empty
   # path: managed_disk.staging_storage_account_id
   #   source:    [from commonids.ValidateStorageAccountID] !ok
   # path: managed_disk.staging_storage_account_id
@@ -273,5 +225,8 @@ EOT
   #   source:    [from commonids.ValidateVirtualMachineScaleSetID] !ok
   # path: target_virtual_machine_scale_set_id
   #   source:    [from commonids.ValidateVirtualMachineScaleSetID] err != nil
+  # path: target_virtual_machine_size
+  #   condition: length(value) > 0
+  #   message:   must not be empty
 }
 

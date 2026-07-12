@@ -24,7 +24,7 @@ resource "azurerm_site_recovery_replicated_vm" "site_recovery_replicated_vms" {
   test_network_id                           = each.value.test_network_id
 
   dynamic "managed_disk" {
-    for_each = each.value.managed_disk != null ? [each.value.managed_disk] : []
+    for_each = each.value.managed_disk != null ? each.value.managed_disk : []
     content {
       disk_id                    = managed_disk.value.disk_id
       staging_storage_account_id = managed_disk.value.staging_storage_account_id
@@ -52,7 +52,7 @@ resource "azurerm_site_recovery_replicated_vm" "site_recovery_replicated_vms" {
   }
 
   dynamic "network_interface" {
-    for_each = each.value.network_interface != null ? [each.value.network_interface] : []
+    for_each = each.value.network_interface != null ? each.value.network_interface : []
     content {
       failover_test_public_ip_address_id              = network_interface.value.failover_test_public_ip_address_id
       failover_test_static_ip                         = network_interface.value.failover_test_static_ip
@@ -66,7 +66,7 @@ resource "azurerm_site_recovery_replicated_vm" "site_recovery_replicated_vms" {
   }
 
   dynamic "unmanaged_disk" {
-    for_each = each.value.unmanaged_disk != null ? [each.value.unmanaged_disk] : []
+    for_each = each.value.unmanaged_disk != null ? each.value.unmanaged_disk : []
     content {
       disk_uri                   = unmanaged_disk.value.disk_uri
       staging_storage_account_id = unmanaged_disk.value.staging_storage_account_id
