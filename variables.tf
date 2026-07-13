@@ -109,152 +109,134 @@ EOT
       target_storage_account_id  = optional(string)
     })))
   }))
-  # --- Unconfirmed validation candidates, derived from azurerm_site_recovery_replicated_vm's provider source ---
-  # Not auto-enabled: either a bespoke provider validator we can't safely translate,
-  # or a path that crosses a list-typed block (needs its own for_each wrapping).
-  # Review, translate into a real validation{} block above, and delete once confirmed.
-  # path: name
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: resource_group_name
-  #   condition: length(value) <= 90
-  #   message:   [from resourcegroups.ValidateName: invalid when len(value) > 90]
-  #   source:    [from resourcegroups.ValidateName: invalid when len(value) > 90]
-  # path: resource_group_name
-  #   condition: !endswith(value, ".")
-  #   message:   [from resourcegroups.ValidateName: must not end with "."]
-  #   source:    [from resourcegroups.ValidateName: must not end with "."]
-  # path: resource_group_name
-  #   condition: length(value) != 0
-  #   message:   [from resourcegroups.ValidateName: invalid when len(value) == 0]
-  #   source:    [from resourcegroups.ValidateName: invalid when len(value) == 0]
-  # path: resource_group_name
-  #   source:    [from resourcegroups.ValidateName] !matched
-  # path: recovery_vault_name
-  #   source:    validate.RecoveryServicesVaultName: no recognizable `if ... { errors = append(...) }` pattern - read it by hand
-  # path: source_recovery_fabric_name
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: source_vm_id
-  #   source:    [from azure.ValidateResourceID] !ok
-  # path: source_vm_id
-  #   source:    [from azure.ValidateResourceID] err != nil
-  # path: target_recovery_fabric_id
-  #   source:    [from replicationfabrics.ValidateReplicationFabricID] !ok
-  # path: target_recovery_fabric_id
-  #   source:    [from replicationfabrics.ValidateReplicationFabricID] err != nil
-  # path: recovery_replication_policy_id
-  #   source:    [from replicationpolicies.ValidateReplicationPolicyID] !ok
-  # path: recovery_replication_policy_id
-  #   source:    [from replicationpolicies.ValidateReplicationPolicyID] err != nil
-  # path: source_recovery_protection_container_name
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: target_recovery_protection_container_id
-  #   source:    [from replicationprotectioncontainers.ValidateReplicationProtectionContainerID] !ok
-  # path: target_recovery_protection_container_id
-  #   source:    [from replicationprotectioncontainers.ValidateReplicationProtectionContainerID] err != nil
-  # path: target_resource_group_id
-  #   source:    [from commonids.ValidateResourceGroupID] !ok
-  # path: target_resource_group_id
-  #   source:    [from commonids.ValidateResourceGroupID] err != nil
-  # path: target_availability_set_id
-  #   source:    [from commonids.ValidateAvailabilitySetID] !ok
-  # path: target_availability_set_id
-  #   source:    [from commonids.ValidateAvailabilitySetID] err != nil
-  # path: target_zone
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: target_network_id
-  #   source:    [from commonids.ValidateVirtualNetworkID] !ok
-  # path: target_network_id
-  #   source:    [from commonids.ValidateVirtualNetworkID] err != nil
-  # path: test_network_id
-  #   source:    [from commonids.ValidateVirtualNetworkID] !ok
-  # path: test_network_id
-  #   source:    [from commonids.ValidateVirtualNetworkID] err != nil
-  # path: target_edge_zone
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: unmanaged_disk.disk_uri
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: unmanaged_disk.staging_storage_account_id
-  #   source:    [from azure.ValidateResourceID] !ok
-  # path: unmanaged_disk.staging_storage_account_id
-  #   source:    [from azure.ValidateResourceID] err != nil
-  # path: unmanaged_disk.target_storage_account_id
-  #   source:    [from commonids.ValidateStorageAccountID] !ok
-  # path: unmanaged_disk.target_storage_account_id
-  #   source:    [from commonids.ValidateStorageAccountID] err != nil
-  # path: multi_vm_group_name
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: managed_disk.disk_id
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: managed_disk.staging_storage_account_id
-  #   source:    [from commonids.ValidateStorageAccountID] !ok
-  # path: managed_disk.staging_storage_account_id
-  #   source:    [from commonids.ValidateStorageAccountID] err != nil
-  # path: managed_disk.target_resource_group_id
-  #   source:    [from commonids.ValidateResourceGroupID] !ok
-  # path: managed_disk.target_resource_group_id
-  #   source:    [from commonids.ValidateResourceGroupID] err != nil
-  # path: managed_disk.target_disk_type
-  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
-  # path: managed_disk.target_replica_disk_type
-  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
-  # path: managed_disk.target_disk_encryption_set_id
-  #   source:    [from commonids.ValidateDiskEncryptionSetID] !ok
-  # path: managed_disk.target_disk_encryption_set_id
-  #   source:    [from commonids.ValidateDiskEncryptionSetID] err != nil
-  # path: target_proximity_placement_group_id
-  #   source:    [from proximityplacementgroups.ValidateProximityPlacementGroupID] !ok
-  # path: target_proximity_placement_group_id
-  #   source:    [from proximityplacementgroups.ValidateProximityPlacementGroupID] err != nil
-  # path: target_boot_diagnostic_storage_account_id
-  #   source:    [from commonids.ValidateStorageAccountID] !ok
-  # path: target_boot_diagnostic_storage_account_id
-  #   source:    [from commonids.ValidateStorageAccountID] err != nil
-  # path: target_capacity_reservation_group_id
-  #   source:    [from capacityreservationgroups.ValidateCapacityReservationGroupID] !ok
-  # path: target_capacity_reservation_group_id
-  #   source:    [from capacityreservationgroups.ValidateCapacityReservationGroupID] err != nil
-  # path: target_virtual_machine_scale_set_id
-  #   source:    [from commonids.ValidateVirtualMachineScaleSetID] !ok
-  # path: target_virtual_machine_scale_set_id
-  #   source:    [from commonids.ValidateVirtualMachineScaleSetID] err != nil
-  # path: target_virtual_machine_size
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: network_interface.source_network_interface_id
-  #   source:    [from azure.ValidateResourceID] !ok
-  # path: network_interface.source_network_interface_id
-  #   source:    [from azure.ValidateResourceID] err != nil
-  # path: network_interface.failover_test_static_ip
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: network_interface.target_static_ip
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: network_interface.failover_test_subnet_name
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: network_interface.target_subnet_name
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: network_interface.failover_test_public_ip_address_id
-  #   source:    [from azure.ValidateResourceID] !ok
-  # path: network_interface.failover_test_public_ip_address_id
-  #   source:    [from azure.ValidateResourceID] err != nil
-  # path: network_interface.recovery_load_balancer_backend_address_pool_ids[*]
-  #   source:    [from loadbalancers.ValidateLoadBalancerBackendAddressPoolID] !ok
-  # path: network_interface.recovery_load_balancer_backend_address_pool_ids[*]
-  #   source:    [from loadbalancers.ValidateLoadBalancerBackendAddressPoolID] err != nil
-  # path: network_interface.recovery_public_ip_address_id
-  #   source:    [from azure.ValidateResourceID] !ok
-  # path: network_interface.recovery_public_ip_address_id
-  #   source:    [from azure.ValidateResourceID] err != nil
+  validation {
+    condition = alltrue([
+      for k, v in var.site_recovery_replicated_vms : (
+        length(v.name) > 0
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.site_recovery_replicated_vms : (
+        length(v.resource_group_name) <= 90
+      )
+    ])
+    error_message = "[from resourcegroups.ValidateName: invalid when len(value) > 90]"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.site_recovery_replicated_vms : (
+        !endswith(v.resource_group_name, ".")
+      )
+    ])
+    error_message = "[from resourcegroups.ValidateName: must not end with \".\"]"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.site_recovery_replicated_vms : (
+        length(v.resource_group_name) != 0
+      )
+    ])
+    error_message = "[from resourcegroups.ValidateName: invalid when len(value) == 0]"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.site_recovery_replicated_vms : (
+        length(v.source_recovery_fabric_name) > 0
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.site_recovery_replicated_vms : (
+        length(v.source_recovery_protection_container_name) > 0
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.site_recovery_replicated_vms : (
+        v.target_zone == null || (length(v.target_zone) > 0)
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.site_recovery_replicated_vms : (
+        v.target_edge_zone == null || (length(v.target_edge_zone) > 0)
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.site_recovery_replicated_vms : (
+        v.unmanaged_disk == null || alltrue([for item in v.unmanaged_disk : (item.disk_uri == null || (length(item.disk_uri) > 0))])
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.site_recovery_replicated_vms : (
+        v.multi_vm_group_name == null || (length(v.multi_vm_group_name) > 0)
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.site_recovery_replicated_vms : (
+        v.managed_disk == null || alltrue([for item in v.managed_disk : (item.disk_id == null || (length(item.disk_id) > 0))])
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.site_recovery_replicated_vms : (
+        v.target_virtual_machine_size == null || (length(v.target_virtual_machine_size) > 0)
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.site_recovery_replicated_vms : (
+        v.network_interface == null || alltrue([for item in v.network_interface : (item.failover_test_static_ip == null || (length(item.failover_test_static_ip) > 0))])
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.site_recovery_replicated_vms : (
+        v.network_interface == null || alltrue([for item in v.network_interface : (item.target_static_ip == null || (length(item.target_static_ip) > 0))])
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.site_recovery_replicated_vms : (
+        v.network_interface == null || alltrue([for item in v.network_interface : (item.failover_test_subnet_name == null || (length(item.failover_test_subnet_name) > 0))])
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.site_recovery_replicated_vms : (
+        v.network_interface == null || alltrue([for item in v.network_interface : (item.target_subnet_name == null || (length(item.target_subnet_name) > 0))])
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  # Note: 46 additional provider-side validators are enforced at apply time but not mirrored as validation{} blocks here (bespoke or non-mechanically-translatable).
 }
 
