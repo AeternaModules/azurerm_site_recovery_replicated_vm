@@ -25,19 +25,19 @@ Optional:
     - target_zone
     - test_network_id
     - managed_disk (block):
-        - disk_id (required)
-        - staging_storage_account_id (required)
+        - disk_id (optional)
+        - staging_storage_account_id (optional)
         - target_disk_encryption (optional, block):
-            - disk_encryption_key (required, block):
-                - secret_url (required)
-                - vault_id (required)
+            - disk_encryption_key (optional, block):
+                - secret_url (optional)
+                - vault_id (optional)
             - key_encryption_key (optional, block):
-                - key_url (required)
-                - vault_id (required)
+                - key_url (optional)
+                - vault_id (optional)
         - target_disk_encryption_set_id (optional)
-        - target_disk_type (required)
-        - target_replica_disk_type (required)
-        - target_resource_group_id (required)
+        - target_disk_type (optional)
+        - target_replica_disk_type (optional)
+        - target_resource_group_id (optional)
     - network_interface (block):
         - failover_test_public_ip_address_id (optional)
         - failover_test_static_ip (optional)
@@ -48,9 +48,9 @@ Optional:
         - target_static_ip (optional)
         - target_subnet_name (optional)
     - unmanaged_disk (block):
-        - disk_uri (required)
-        - staging_storage_account_id (required)
-        - target_storage_account_id (required)
+        - disk_uri (optional)
+        - staging_storage_account_id (optional)
+        - target_storage_account_id (optional)
 EOT
 
   type = map(object({
@@ -76,22 +76,22 @@ EOT
     target_edge_zone                          = optional(string)
     test_network_id                           = optional(string)
     managed_disk = optional(list(object({
-      disk_id                    = string
-      staging_storage_account_id = string
-      target_disk_encryption = optional(object({
-        disk_encryption_key = object({
-          secret_url = string
-          vault_id   = string
-        })
-        key_encryption_key = optional(object({
-          key_url  = string
-          vault_id = string
-        }))
-      }))
+      disk_id                    = optional(string)
+      staging_storage_account_id = optional(string)
+      target_disk_encryption = optional(list(object({
+        disk_encryption_key = optional(list(object({
+          secret_url = optional(string)
+          vault_id   = optional(string)
+        })))
+        key_encryption_key = optional(list(object({
+          key_url  = optional(string)
+          vault_id = optional(string)
+        })))
+      })))
       target_disk_encryption_set_id = optional(string)
-      target_disk_type              = string
-      target_replica_disk_type      = string
-      target_resource_group_id      = string
+      target_disk_type              = optional(string)
+      target_replica_disk_type      = optional(string)
+      target_resource_group_id      = optional(string)
     })))
     network_interface = optional(list(object({
       failover_test_public_ip_address_id              = optional(string)
@@ -104,9 +104,9 @@ EOT
       target_subnet_name                              = optional(string)
     })))
     unmanaged_disk = optional(list(object({
-      disk_uri                   = string
-      staging_storage_account_id = string
-      target_storage_account_id  = string
+      disk_uri                   = optional(string)
+      staging_storage_account_id = optional(string)
+      target_storage_account_id  = optional(string)
     })))
   }))
   # --- Unconfirmed validation candidates, derived from azurerm_site_recovery_replicated_vm's provider source ---
@@ -228,5 +228,33 @@ EOT
   # path: target_virtual_machine_size
   #   condition: length(value) > 0
   #   message:   must not be empty
+  # path: network_interface.source_network_interface_id
+  #   source:    [from azure.ValidateResourceID] !ok
+  # path: network_interface.source_network_interface_id
+  #   source:    [from azure.ValidateResourceID] err != nil
+  # path: network_interface.failover_test_static_ip
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: network_interface.target_static_ip
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: network_interface.failover_test_subnet_name
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: network_interface.target_subnet_name
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: network_interface.failover_test_public_ip_address_id
+  #   source:    [from azure.ValidateResourceID] !ok
+  # path: network_interface.failover_test_public_ip_address_id
+  #   source:    [from azure.ValidateResourceID] err != nil
+  # path: network_interface.recovery_load_balancer_backend_address_pool_ids[*]
+  #   source:    [from loadbalancers.ValidateLoadBalancerBackendAddressPoolID] !ok
+  # path: network_interface.recovery_load_balancer_backend_address_pool_ids[*]
+  #   source:    [from loadbalancers.ValidateLoadBalancerBackendAddressPoolID] err != nil
+  # path: network_interface.recovery_public_ip_address_id
+  #   source:    [from azure.ValidateResourceID] !ok
+  # path: network_interface.recovery_public_ip_address_id
+  #   source:    [from azure.ValidateResourceID] err != nil
 }
 

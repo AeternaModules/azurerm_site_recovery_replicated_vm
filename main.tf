@@ -29,14 +29,17 @@ resource "azurerm_site_recovery_replicated_vm" "site_recovery_replicated_vms" {
       disk_id                    = managed_disk.value.disk_id
       staging_storage_account_id = managed_disk.value.staging_storage_account_id
       dynamic "target_disk_encryption" {
-        for_each = managed_disk.value.target_disk_encryption != null ? [managed_disk.value.target_disk_encryption] : []
+        for_each = managed_disk.value.target_disk_encryption != null ? managed_disk.value.target_disk_encryption : []
         content {
-          disk_encryption_key {
-            secret_url = target_disk_encryption.value.disk_encryption_key.secret_url
-            vault_id   = target_disk_encryption.value.disk_encryption_key.vault_id
+          dynamic "disk_encryption_key" {
+            for_each = target_disk_encryption.value.disk_encryption_key != null ? target_disk_encryption.value.disk_encryption_key : []
+            content {
+              secret_url = disk_encryption_key.value.secret_url
+              vault_id   = disk_encryption_key.value.vault_id
+            }
           }
           dynamic "key_encryption_key" {
-            for_each = target_disk_encryption.value.key_encryption_key != null ? [target_disk_encryption.value.key_encryption_key] : []
+            for_each = target_disk_encryption.value.key_encryption_key != null ? target_disk_encryption.value.key_encryption_key : []
             content {
               key_url  = key_encryption_key.value.key_url
               vault_id = key_encryption_key.value.vault_id
